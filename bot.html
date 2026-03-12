@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Бот-панель · Педагогический портал</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+.wrap{max-width:700px;margin:0 auto;padding:24px 16px}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #21262d}
+.hdr-icon{width:52px;height:52px;background:linear-gradient(135deg,#0088cc,#29b6f6);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 16px rgba(0,136,204,.35)}
+.hdr h1{font-size:1.15rem;font-weight:800;color:#e6edf3;line-height:1.3}
+.hdr p{font-size:11px;color:#8b949e;margin-top:3px}
+
+/* ── Auth gate ── */
+.gate{background:#161b22;border:1px solid #21262d;border-radius:14px;padding:28px;text-align:center}
+.gate h2{font-size:1rem;font-weight:700;margin-bottom:6px}
+.gate p{font-size:12px;color:#8b949e;margin-bottom:18px}
+.field{width:100%;padding:11px 14px;background:#0d1117;border:1.5px solid #30363d;border-radius:9px;color:#e6edf3;font-family:inherit;font-size:14px;outline:none;margin-bottom:10px;transition:border .18s}
+.field:focus{border-color:#58a6ff}
+.err-msg{color:#f85149;font-size:12px;margin-top:-4px;margin-bottom:8px;display:none}
+
+/* ── Status bar ── */
+.status{display:flex;align-items:center;gap:9px;background:#161b22;border:1px solid #21262d;border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:13px}
+.sdot{width:9px;height:9px;border-radius:50%;background:#3fb950;flex-shrink:0;transition:background .3s}
+.sdot.off{background:#da3633;animation:none}
+.sdot.wait{background:#f0883e}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.sdot.on{animation:blink 1.6s ease-in-out infinite}
+.s-upd{margin-left:auto;font-size:11px;color:#8b949e}
+
+/* ── Stats grid ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{background:#161b22;border:1px solid #21262d;border-radius:11px;padding:14px 10px;text-align:center}
+.stat-n{font-size:1.8rem;font-weight:800;color:#58a6ff;line-height:1}
+.stat-l{font-size:11px;color:#8b949e;margin-top:4px}
+
+/* ── Card ── */
+.card{background:#161b22;border:1px solid #21262d;border-radius:12px;padding:18px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;color:#58a6ff;margin-bottom:13px;display:flex;align-items:center;gap:6px}
+
+/* ── Buttons ── */
+.btn{padding:9px 16px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:5px}
+.btn-green{background:#238636;color:#fff} .btn-green:hover{background:#2ea043}
+.btn-red{background:#da3633;color:#fff} .btn-red:hover{background:#f85149}
+.btn-blue{background:#1f6feb;color:#fff} .btn-blue:hover{background:#388bfd}
+.btn-gray{background:#21262d;color:#e6edf3;border:1px solid #30363d} .btn-gray:hover{background:#30363d}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── Users list ── */
+.users-wrap{max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+.urow{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0d1117;border:1px solid #21262d;border-radius:9px}
+.uav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#003366,#1976D2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.uinfo{flex:1;min-width:0}
+.uname{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.umeta{font-size:11px;color:#8b949e;margin-top:1px}
+.udate{font-size:11px;color:#3fb950;white-space:nowrap;margin-left:auto}
+.empty{text-align:center;padding:28px 0;color:#8b949e;font-size:13px}
+
+/* ── Log ── */
+.log{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px;font-size:11.5px;font-family:'Courier New',monospace;line-height:1.8;max-height:260px;overflow-y:auto}
+.log-row{border-bottom:1px solid #161b22;padding:2px 0}
+.log-row:last-child{border:none}
+.t-time{color:#3fb950} .t-cmd{color:#58a6ff} .t-err{color:#f85149} .t-ok{color:#3fb950} .t-info{color:#f0883e}
+
+/* ── Bot commands help ── */
+.cmds{display:flex;flex-direction:column;gap:7px}
+.cmd-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#0d1117;border-radius:7px;border:1px solid #21262d;font-size:12px}
+.cmd-name{color:#58a6ff;font-family:monospace;font-weight:700;min-width:80px}
+.cmd-desc{color:#8b949e}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:#0d1117} ::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ═══ AUTH GATE ═══ -->
+<div id="gate">
+  <div class="hdr">
+    <div class="hdr-icon">🤖</div>
+    <div><h1>Панель администратора</h1><p>Педагогический портал · Петропавловск</p></div>
+  </div>
+  <div class="gate">
+    <h2>🔐 Вход для администратора</h2>
+    <p>Введите пароль для доступа к панели управления</p>
+    <input class="field" type="password" id="apwd" placeholder="Пароль администратора..." onkeydown="if(event.key==='Enter')checkPwd()"/>
+    <div class="err-msg" id="pwd-err">⚠ Неверный пароль</div>
+    <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="checkPwd()">Войти в панель →</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN PANEL ═══ -->
+<div id="panel" style="display:none">
+  <div class="hdr">
+    <div class="hdr-icon">🤖</div>
+    <div><h1>Панель администратора</h1><p>Цифровой навигатор педагога · Петропавловск</p></div>
+  </div>
+
+  <!-- Status -->
+  <div class="status">
+    <div class="sdot off" id="sdot"></div>
+    <span id="stxt">Бот не запущен</span>
+    <span class="s-upd" id="supd"></span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="sn-users">—</div><div class="stat-l">Педагогов</div></div>
+    <div class="stat"><div class="stat-n" id="sn-today">—</div><div class="stat-l">Сегодня</div></div>
+    <div class="stat"><div class="stat-n" id="sn-msgs">—</div><div class="stat-l">Сообщений</div></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">⚙️ Управление ботом</div>
+    <div class="btn-row">
+      <button class="btn btn-green" id="btn-start" onclick="startBot()">▶ Запустить бот</button>
+      <button class="btn btn-red"   id="btn-stop"  onclick="stopBot()" disabled>⏹ Остановить</button>
+      <button class="btn btn-gray"  onclick="loadAll()">🔄 Обновить</button>
+      <button class="btn btn-gray"  onclick="sendTestMsg()">📨 Тест уведомление</button>
+    </div>
+  </div>
+
+  <!-- Commands reference -->
+  <div class="card">
+    <div class="card-title">📋 Команды бота в Telegram</div>
+    <div class="cmds">
+      <div class="cmd-row"><span class="cmd-name">/start</span><span class="cmd-desc">Запуск бота, приветствие и список команд</span></div>
+      <div class="cmd-row"><span class="cmd-name">/users</span><span class="cmd-desc">Список всех зарегистрированных педагогов</span></div>
+      <div class="cmd-row"><span class="cmd-name">/stats</span><span class="cmd-desc">Статистика: педагоги, сообщения, регистрации сегодня</span></div>
+      <div class="cmd-row"><span class="cmd-name">/last5</span><span class="cmd-desc">Последние 5 регистраций с датой и временем</span></div>
+      <div class="cmd-row"><span class="cmd-name">/help</span><span class="cmd-desc">Справка по всем командам</span></div>
+    </div>
+    <p style="font-size:11px;color:#8b949e;margin-top:10px">⚠️ Эту страницу нужно держать открытой чтобы бот отвечал на команды</p>
+  </div>
+
+  <!-- Users -->
+  <div class="card">
+    <div class="card-title">👥 Педагоги в системе</div>
+    <div class="users-wrap" id="users-wrap">
+      <div class="empty">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="card-title">📟 Лог бота</div>
+    <div class="log" id="log"><div class="log-row t-info">Ожидание запуска...</div></div>
+  </div>
+</div><!-- /panel -->
+
+</div><!-- /wrap -->
+
+<script>
+const SB_URL  = 'https://ljtogliylpubvkckpwyv.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqdG9nbGl5bHB1YnZrY2twd3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzEzODQsImV4cCI6MjA4ODc0NzM4NH0.91EQ_EEfi8X09Vm0jmH12_35R6tf0BwtTGoX3K5lgfc';
+const TG_TOKEN = '8222635506:AAGalT-Y-31jQ6VWKZHBcqqmeGc27M_c1Lk';
+const ADMIN_ID = '8129422076';
+const ADMIN_PWD = 'pedagog_sko_2025'; // ← поменяй на свой пароль!
+
+let polling = false, pollTimer = null, lastId = 0;
+
+/* ── Auth ── */
+function checkPwd() {
+  const v = document.getElementById('apwd').value;
+  if (v === ADMIN_PWD) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    loadAll();
+  } else {
+    const e = document.getElementById('pwd-err');
+    e.style.display = 'block';
+    setTimeout(() => e.style.display = 'none', 3000);
+  }
+}
+
+/* ── Supabase ── */
+async function sb(path) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+      headers: { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON }
+    });
+    return r.json();
+  } catch(e) { return null; }
+}
+async function sbCount(table) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?select=id`, {
+      headers: { 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON,
+                 'Prefer': 'count=exact', 'Range': '0-0' }
+    });
+    return parseInt(r.headers.get('Content-Range')?.split('/')?.[1] || '0');
+  } catch(e) { return 0; }
+}
+
+/* ── Load all data ── */
+async function loadAll() {
+  await Promise.all([loadUsers(), loadStats()]);
+}
+
+async function loadStats() {
+  const total = await sbCount('pedagog_users');
+  document.getElementById('sn-users').textContent = total;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const newRows = await sb(`pedagog_users?created_at=gte.${today.toISOString()}&select=id`);
+  document.getElementById('sn-today').textContent = newRows?.length ?? '—';
+
+  const msgs = await sbCount('chat_messages');
+  document.getElementById('sn-msgs').textContent = msgs || '—';
+}
+
+async function loadUsers() {
+  const rows = await sb('pedagog_users?select=id,login,name,role,created_at&order=created_at.desc&limit=100');
+  const el = document.getElementById('users-wrap');
+  if (!rows?.length) { el.innerHTML = '<div class="empty">Нет педагогов в системе</div>'; return; }
+  el.innerHTML = rows.map(u => {
+    const d = new Date(u.created_at);
+    const date = d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const time = d.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+    return `<div class="urow">
+      <div class="uav">${(u.name||u.login||'?').charAt(0).toUpperCase()}</div>
+      <div class="uinfo">
+        <div class="uname">${u.name || '—'}</div>
+        <div class="umeta">Логин: ${u.login || '—'} · ${u.role || 'teacher'}</div>
+      </div>
+      <div class="udate">${date}<br>${time}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Telegram API ── */
+async function tg(method, body = {}) {
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/${method}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return r.json();
+  } catch(e) { return null; }
+}
+
+async function send(chatId, text, extra = {}) {
+  return tg('sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', ...extra });
+}
+
+/* ── Logging ── */
+function log(type, msg) {
+  const el = document.getElementById('log');
+  const time = new Date().toLocaleTimeString('ru-RU');
+  el.insertAdjacentHTML('afterbegin',
+    `<div class="log-row"><span class="t-time">[${time}]</span> <span class="t-${type}">${msg}</span></div>`
+  );
+  // keep max 80 entries
+  while (el.children.length > 80) el.removeChild(el.lastChild);
+}
+
+/* ── Handle incoming Telegram commands ── */
+async function handleUpdate(upd) {
+  const msg = upd.message || upd.edited_message;
+  if (!msg?.text) return;
+
+  const chatId = String(msg.chat.id);
+  const text   = msg.text.trim();
+  const from   = msg.from?.first_name || 'Unknown';
+
+  log('cmd', `📨 @${from} [${chatId}]: ${text}`);
+
+  // Security — only admin
+  if (chatId !== ADMIN_ID) {
+    await send(chatId, '⛔ Доступ запрещён. Бот только для администратора портала.');
+    log('err', `Отказано: chatId ${chatId}`);
+    return;
+  }
+
+  const cmd = text.split(' ')[0].toLowerCase();
+
+  if (cmd === '/start' || cmd === '/help') {
+    await send(chatId,
+      '🤖 <b>Бот Педагогического портала</b>\n' +
+      '📍 Петропавловск, СКО\n' +
+      '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+      '📋 <b>Команды:</b>\n' +
+      '/users — список всех педагогов\n' +
+      '/stats — статистика портала\n' +
+      '/last5 — последние 5 регистраций\n' +
+      '/help — список команд\n\n' +
+      '🔔 Уведомления о входе и регистрации приходят автоматически.'
+    );
+    log('ok', 'Отправлен /help');
+  }
+
+  else if (cmd === '/users') {
+    const rows = await sb('pedagog_users?select=id,login,name,created_at&order=created_at.desc&limit=50');
+    if (!rows?.length) { await send(chatId, '👥 Нет зарегистрированных педагогов'); return; }
+    let txt = `👥 <b>Педагоги в системе (${rows.length}):</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    rows.forEach((u, i) => {
+      const d = new Date(u.created_at).toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
+      txt += `${i+1}. <b>${u.name}</b> <code>${u.login||''}</code> — ${d}\n`;
+    });
+    await send(chatId, txt);
+    log('ok', `Отправлен /users — ${rows.length} педагогов`);
+  }
+
+  else if (cmd === '/stats') {
+    const total = await sbCount('pedagog_users');
+    const msgs  = await sbCount('chat_messages');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const newToday = await sb(`pedagog_users?created_at=gte.${today.toISOString()}&select=id`);
+    await send(chatId,
+      '📊 <b>Статистика портала</b>\n' +
+      '━━━━━━━━━━━━━━━━━━━━━\n\n' +
+      `👥 Педагогов зарегистрировано: <b>${total}</b>\n` +
+      `🆕 Новых сегодня: <b>${newToday?.length ?? 0}</b>\n` +
+      `💬 Сообщений в чате: <b>${msgs}</b>\n\n` +
+      `🕐 Обновлено: ${new Date().toLocaleString('ru-RU', { timeZone:'Asia/Almaty', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}`
+    );
+    log('ok', 'Отправлен /stats');
+  }
+
+  else if (cmd === '/last5') {
+    const rows = await sb('pedagog_users?select=login,name,created_at&order=created_at.desc&limit=5');
+    if (!rows?.length) { await send(chatId, 'Нет данных'); return; }
+    let txt = '🆕 <b>Последние регистрации:</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n';
+    rows.forEach(u => {
+      const d = new Date(u.created_at).toLocaleString('ru-RU', {
+        timeZone: 'Asia/Almaty', day:'2-digit', month:'2-digit',
+        hour:'2-digit', minute:'2-digit'
+      });
+      txt += `• <b>${u.name}</b> <code>${u.login||''}</code>\n  🕐 ${d}\n\n`;
+    });
+    await send(chatId, txt);
+    log('ok', 'Отправлен /last5');
+  }
+
+  else {
+    await send(chatId, '❓ Неизвестная команда.\nВведите /help для списка команд.');
+  }
+}
+
+/* ── Polling loop ── */
+async function pollOnce() {
+  const data = await tg('getUpdates', { offset: lastId + 1, timeout: 5, limit: 20 });
+  if (!data?.ok || !data.result?.length) return;
+  for (const upd of data.result) {
+    lastId = upd.update_id;
+    await handleUpdate(upd);
+  }
+  document.getElementById('supd').textContent =
+    'Обновлено: ' + new Date().toLocaleTimeString('ru-RU');
+}
+
+function startBot() {
+  if (polling) return;
+  polling = true;
+  document.getElementById('sdot').className = 'sdot on';
+  document.getElementById('stxt').textContent = 'Бот активен — слушает команды';
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled  = false;
+  log('ok', '▶ Бот запущен');
+
+  const loop = async () => {
+    if (!polling) return;
+    try { await pollOnce(); }
+    catch(e) { log('err', 'Ошибка polling: ' + e.message); }
+    if (polling) pollTimer = setTimeout(loop, 3000);
+  };
+  loop();
+}
+
+function stopBot() {
+  polling = false;
+  clearTimeout(pollTimer);
+  document.getElementById('sdot').className = 'sdot off';
+  document.getElementById('stxt').textContent = 'Бот остановлен';
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled  = true;
+  log('info', '⏹ Бот остановлен');
+}
+
+async function sendTestMsg() {
+  log('info', 'Отправка тест-уведомления...');
+  const res = await send(ADMIN_ID,
+    '🧪 <b>Тест уведомления</b>\n' +
+    '━━━━━━━━━━━━━━━━━━━━━\n' +
+    '✅ Бот работает корректно!\n' +
+    `🕐 ${new Date().toLocaleString('ru-RU', { timeZone:'Asia/Almaty' })}`
+  );
+  if (res?.ok) log('ok', '✓ Тест-уведомление отправлено');
+  else         log('err', '✗ Ошибка отправки: ' + JSON.stringify(res));
+}
+
+// Enter key on password
+document.getElementById('apwd').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPwd();
+});
+</script>
+</body>
+</html>

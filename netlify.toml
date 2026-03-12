@@ -1,0 +1,78 @@
+# ══════════════════════════════════════════
+# NETLIFY CONFIG — Портал педагога СКО
+# ══════════════════════════════════════════
+
+[build]
+  publish = "."
+
+# ── SECURITY HEADERS (все страницы) ──
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Запрет встраивания в iframe (clickjacking)
+    X-Frame-Options = "DENY"
+    # Запрет угадывания MIME типов
+    X-Content-Type-Options = "nosniff"
+    # XSS защита
+    X-XSS-Protection = "1; mode=block"
+    # Referrer policy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Запрет кэширования чувствительных страниц
+    Cache-Control = "no-store, no-cache, must-revalidate"
+    # Permissions policy — запрет камеры/микрофона/геолокации
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    # HSTS — только HTTPS (включить после проверки)
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # Content Security Policy
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https://*.supabase.co;
+      connect-src 'self' https://*.supabase.co https://api.telegram.org;
+      frame-src 'none';
+      object-src 'none';
+      base-uri 'self';
+    """
+
+# ── ADMIN ЗАЩИТА — закрыть admin.html от индексации ──
+[[headers]]
+  for = "/admin.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+    Cache-Control = "no-store, no-cache"
+
+# ── ПРОКСИ — скрываем Supabase URL и ключ ──
+# Все запросы к /api/db/* → Supabase REST
+[[redirects]]
+  from = "/api/db/*"
+  to = "https://ljtogliylpubvkckpwyv.supabase.co/rest/v1/:splat"
+  status = 200
+  force = true
+  [redirects.headers]
+    apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqdG9nbGl5bHB1YnZrY2twd3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzEzODQsImV4cCI6MjA4ODc0NzM4NH0.91EQ_EEfi8X09Vm0jmH12_35R6tf0BwtTGoX3K5lgfc"
+    Authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqdG9nbGl5bHB1YnZrY2twd3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzEzODQsImV4cCI6MjA4ODc0NzM4NH0.91EQ_EEfi8X09Vm0jmH12_35R6tf0BwtTGoX3K5lgfc"
+
+# Storage прокси
+[[redirects]]
+  from = "/api/storage/*"
+  to = "https://ljtogliylpubvkckpwyv.supabase.co/storage/v1/:splat"
+  status = 200
+  force = true
+  [redirects.headers]
+    apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqdG9nbGl5bHB1YnZrY2twd3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzEzODQsImV4cCI6MjA4ODc0NzM4NH0.91EQ_EEfi8X09Vm0jmH12_35R6tf0BwtTGoX3K5lgfc"
+    Authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqdG9nbGl5bHB1YnZrY2twd3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzEzODQsImV4cCI6MjA4ODc0NzM4NH0.91EQ_EEfi8X09Vm0jmH12_35R6tf0BwtTGoX3K5lgfc"
+
+# Telegram прокси (скрываем bot token)
+[[redirects]]
+  from = "/api/tg/*"
+  to = "https://api.telegram.org/bot8222635506:AAGalT-Y-31jQ6VWKZHBcqqmeGc27M_c1Lk/:splat"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

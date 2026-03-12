@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Мой профиль — Портал педагога</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b1421;--surface:#111d35;--surface2:#172540;--surface3:#1e2f50;
+  --border:rgba(255,255,255,.08);--accent:#1976D2;--accent2:#42a5f5;
+  --green:#4caf50;--red:#ef4444;--yellow:#f59e0b;
+  --text:#e8eeff;--text2:#7a90b8;--text3:#3d5070;
+  --font:'Nunito',sans-serif;--radius:16px;
+}
+body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:100vh;}
+
+/* ── NAV ── */
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  background:var(--surface);position:sticky;top:0;z-index:10;
+}
+.back-link{
+  display:flex;align-items:center;gap:6px;
+  color:var(--text2);text-decoration:none;font-size:13px;font-weight:700;
+  padding:7px 14px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface2);transition:all .18s;
+}
+.back-link:hover{color:var(--text);background:var(--surface3);}
+.topbar-title{font-size:16px;font-weight:900;}
+.topbar-sub{font-size:12px;color:var(--text2);margin-left:auto;}
+
+/* ── LAYOUT ── */
+.page{max-width:600px;margin:0 auto;padding:28px 16px 60px;}
+
+/* ── PROFILE CARD ── */
+.profile-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:28px;margin-bottom:20px;
+  display:flex;align-items:center;gap:20px;
+}
+.profile-av{
+  width:72px;height:72px;border-radius:22px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:900;color:#fff;
+  box-shadow:0 6px 24px rgba(25,118,210,.35);
+}
+.profile-info{}
+.profile-name{font-size:20px;font-weight:900;margin-bottom:4px;}
+.profile-login{font-size:13px;color:var(--text2);margin-bottom:6px;}
+.role-badge{
+  display:inline-block;padding:3px 12px;border-radius:20px;
+  font-size:11px;font-weight:800;
+  background:rgba(25,118,210,.2);border:1px solid rgba(25,118,210,.4);color:var(--accent2);
+}
+.role-badge.admin{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.4);color:#fbbf24;}
+
+/* ── SECTION CARD ── */
+.sec-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;margin-bottom:16px;overflow:hidden;
+}
+.sec-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.sec-head-icon{
+  width:36px;height:36px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  background:var(--surface2);flex-shrink:0;
+}
+.sec-head h3{font-size:14px;font-weight:900;}
+.sec-head p{font-size:11px;color:var(--text2);margin-top:1px;}
+.sec-body{padding:18px 20px;}
+
+/* ── FORM ── */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.field input{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:12px;padding:11px 14px;font-family:var(--font);
+  font-size:13.5px;color:var(--text);outline:none;transition:border-color .2s;
+}
+.field input:focus{border-color:rgba(25,118,210,.6);}
+.field input.error{border-color:rgba(239,68,68,.5);}
+.field-hint{font-size:11px;color:var(--text2);margin-top:5px;}
+.field-hint.ok{color:var(--green);}
+.field-hint.err{color:var(--red);}
+
+.pwd-wrap{position:relative;}
+.pwd-wrap input{padding-right:42px;}
+.eye-btn{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2);
+  padding:4px;
+}
+
+/* ── PIN PAD ── */
+.pin-section{margin-bottom:16px;}
+.pin-label{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:block;}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:14px;}
+.pin-dot{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--border);background:transparent;transition:all .2s;
+}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;}
+.np-btn{
+  padding:14px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-family:var(--font);
+  font-size:16px;font-weight:800;cursor:pointer;transition:all .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.np-btn:hover{background:var(--surface3);transform:scale(1.04);}
+.np-btn:active{transform:scale(.97);}
+.np-btn.del{font-size:18px;}
+
+/* ── STRENGTH ── */
+.pwd-bars{display:flex;gap:4px;margin-bottom:6px;}
+.pwd-bar{height:4px;flex:1;border-radius:2px;background:var(--surface3);transition:background .3s;}
+
+/* ── BUTTONS ── */
+.btn-save{
+  width:100%;padding:13px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:var(--font);font-size:14px;font-weight:900;
+  cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-save:hover{opacity:.88;transform:translateY(-1px);}
+.btn-save:disabled{opacity:.4;cursor:default;transform:none;}
+.btn-spinner{
+  width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;display:none;
+  animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.btn-save.loading .btn-spinner{display:block;}
+.btn-save.loading .btn-text{display:none;}
+
+/* ── MSG ── */
+.form-msg{
+  padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;
+  margin-bottom:14px;display:none;
+}
+.form-msg.ok{background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.3);color:#81c784;}
+.form-msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;}
+.form-msg.show{display:block;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.stat-box{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:14px;padding:14px;text-align:center;
+}
+.stat-n{font-size:22px;font-weight:900;color:var(--accent2);}
+.stat-l{font-size:11px;color:var(--text2);margin-top:3px;font-weight:700;}
+
+/* ── DANGER ── */
+.danger-zone{
+  background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);
+  border-radius:14px;padding:16px;margin-top:16px;
+}
+.danger-title{font-size:12px;font-weight:800;color:#f87171;margin-bottom:8px;}
+.btn-danger{
+  padding:10px 20px;border-radius:10px;border:1px solid rgba(239,68,68,.4);
+  background:rgba(239,68,68,.08);color:#f87171;
+  font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;
+  transition:all .18s;
+}
+.btn-danger:hover{background:rgba(239,68,68,.18);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:10px 22px;font-size:13px;font-weight:700;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:rgba(76,175,80,.4);color:#81c784;}
+.toast.err{border-color:rgba(239,68,68,.3);color:#f87171;}
+</style>
+<script src="session.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="back-link">← На сайт</a>
+  <div>
+    <div class="topbar-title">👤 Мой профиль</div>
+  </div>
+  <div class="topbar-sub" id="tb-name"></div>
+</div>
+
+<div class="page">
+
+  <!-- PROFILE CARD -->
+  <div class="profile-card" id="profile-card">
+    <div class="profile-av" id="prof-av">?</div>
+    <div class="profile-info">
+      <div class="profile-name" id="prof-name">Загрузка...</div>
+      <div class="profile-login" id="prof-login"></div>
+      <div class="role-badge" id="prof-role"></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-head-icon">📊</div>
+      <div>
+        <h3>Статистика</h3>
+        <p>Ваша активность на портале</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-n" id="stat-games">—</div><div class="stat-l">Игр сыграно</div></div>
+        <div class="stat-box"><div class="stat-n" id="stat-msgs">—</div><div class="stat-l">Сообщений</div></div>
+        <div class="stat-box"><div class="stat-n" id="stat-days">—</div><div class="stat-l">Дней на портале</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE NAME -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-head-icon">✏️</div>
+      <div>
+        <h3>Изменить имя</h3>
+        <p>Отображается в чате и профиле</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="form-msg" id="msg-name"></div>
+      <div class="field">
+        <label>Ваше имя</label>
+        <input type="text" id="new-name" placeholder="Напр.: Айгуль М." maxlength="30" oninput="checkName()"/>
+      </div>
+      <button class="btn-save" id="btn-name" onclick="saveName()" disabled>
+        <span class="btn-text">💾 Сохранить имя</span>
+        <div class="btn-spinner"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-head-icon">🔑</div>
+      <div>
+        <h3>Изменить пароль</h3>
+        <p>Минимум 6 символов</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="form-msg" id="msg-pwd"></div>
+      <div class="field">
+        <label>Текущий пароль</label>
+        <div class="pwd-wrap">
+          <input type="password" id="cur-pwd" placeholder="Введите текущий пароль" oninput="checkPwdForm()"/>
+          <button class="eye-btn" onclick="toggleEye('cur-pwd',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Новый пароль</label>
+        <div class="pwd-wrap">
+          <input type="password" id="new-pwd" placeholder="Минимум 6 символов" oninput="checkPwdStrength(this.value);checkPwdForm()"/>
+          <button class="eye-btn" onclick="toggleEye('new-pwd',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pwd-bars" id="pwd-bars" style="display:none;margin-top:8px">
+          <div class="pwd-bar" id="pb0"></div><div class="pwd-bar" id="pb1"></div>
+          <div class="pwd-bar" id="pb2"></div><div class="pwd-bar" id="pb3"></div>
+        </div>
+        <div class="field-hint" id="pwd-hint"></div>
+      </div>
+      <div class="field">
+        <label>Повторите новый пароль</label>
+        <div class="pwd-wrap">
+          <input type="password" id="new-pwd2" placeholder="Ещё раз" oninput="checkPwdForm()"/>
+          <button class="eye-btn" onclick="toggleEye('new-pwd2',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="field-hint" id="pwd-match-hint"></div>
+      </div>
+      <button class="btn-save" id="btn-pwd" onclick="savePwd()" disabled>
+        <span class="btn-text">🔑 Сменить пароль</span>
+        <div class="btn-spinner"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- CHANGE PIN -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-head-icon">🔢</div>
+      <div>
+        <h3>Изменить PIN-код</h3>
+        <p>4 цифры — используется при входе</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="form-msg" id="msg-pin"></div>
+
+      <!-- Current PIN -->
+      <div id="pin-step-cur">
+        <span class="pin-label">Введите текущий PIN</span>
+        <div class="pin-dots" id="cur-pin-dots">
+          <div class="pin-dot" id="cpd0"></div><div class="pin-dot" id="cpd1"></div>
+          <div class="pin-dot" id="cpd2"></div><div class="pin-dot" id="cpd3"></div>
+        </div>
+        <div class="numpad" id="cur-numpad"></div>
+      </div>
+
+      <!-- New PIN -->
+      <div id="pin-step-new" style="display:none">
+        <span class="pin-label">Введите новый PIN (4 цифры)</span>
+        <div class="pin-dots" id="new-pin-dots">
+          <div class="pin-dot" id="npd0"></div><div class="pin-dot" id="npd1"></div>
+          <div class="pin-dot" id="npd2"></div><div class="pin-dot" id="npd3"></div>
+        </div>
+        <div class="numpad" id="new-numpad"></div>
+        <button class="btn-danger" style="margin-top:14px;width:100%" onclick="resetPinFlow()">← Назад</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-head-icon">⚠️</div>
+      <div><h3>Выход</h3></div>
+    </div>
+    <div class="sec-body">
+      <button class="btn-danger" style="width:100%" onclick="logout()">🚪 Выйти из аккаунта</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://ljtogliylpubvkckpwyv.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqdG9nbGl5bHB1YnZrY2twd3l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNzEzODQsImV4cCI6MjA4ODc0NzM4NH0.91EQ_EEfi8X09Vm0jmH12_35R6tf0BwtTGoX3K5lgfc';
+// SESSION_KEY удалён — session.js
+const SALT = 'pedagog_sko_2025_';
+
+let me = null;
+let curPin = '';
+let newPin = '';
+
+/* ═══ INIT ═══ */
+window.addEventListener('DOMContentLoaded', async () => {
+  me = await SESSION.getUser();
+  if (!me) { window.location.replace('auth.html'); return; }
+
+  // Fill profile card
+  document.getElementById('prof-av').textContent   = (me.name||'?')[0].toUpperCase();
+  document.getElementById('prof-name').textContent  = me.name;
+  document.getElementById('prof-login').textContent = '@' + me.login;
+  document.getElementById('tb-name').textContent    = me.name;
+  const roleBadge = document.getElementById('prof-role');
+  roleBadge.textContent = me.role === 'admin' ? '👑 Администратор' : '👩‍🏫 Педагог';
+  if (me.role === 'admin') roleBadge.classList.add('admin');
+
+  document.getElementById('new-name').value = me.name;
+
+  buildNumpad('cur-numpad', 'cur');
+  buildNumpad('new-numpad', 'new');
+
+  await loadStats();
+});
+
+/* ═══ SUPABASE ═══ */
+async function sb(path, opts={}) {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: { 'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=representation', ...(opts.headers||{}) },
+    ...opts
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message||r.statusText); }
+  return r.json().catch(()=>null);
+}
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(SALT + str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ═══ STATS ═══ */
+async function loadStats() {
+  try {
+    const [records, msgs] = await Promise.all([
+      sb(`game_records?user_id=eq.${encodeURIComponent(me.id)}&select=id`).catch(()=>[]),
+      sb(`chat_messages_v2?user_id=eq.${encodeURIComponent(me.id)}&select=id`).catch(()=>[]),
+    ]);
+    document.getElementById('stat-games').textContent = (records||[]).length;
+    document.getElementById('stat-msgs').textContent  = (msgs||[]).length;
+    // Days since registration
+    const user = await sb(`pedagog_users?id=eq.${me.id}&select=created_at`).catch(()=>null);
+    if (user && user[0]) {
+      const days = Math.floor((Date.now() - new Date(user[0].created_at)) / 86400000);
+      document.getElementById('stat-days').textContent = days || 1;
+    }
+  } catch(e) {}
+}
+
+/* ═══ CHANGE NAME ═══ */
+function checkName() {
+  const v = document.getElementById('new-name').value.trim();
+  document.getElementById('btn-name').disabled = !v || v === me.name || v.length < 2;
+}
+
+async function saveName() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name || name.length < 2) return;
+  setLoading('btn-name', true);
+  clearMsg('msg-name');
+  try {
+    await sb(`pedagog_users?id=eq.${me.id}`, { method:'PATCH', body:JSON.stringify({name}) });
+    me.name = name;
+    // Обновляем имя в Supabase сессии
+    const tok = SESSION.hasToken ? sessionStorage.getItem('psess_token') || localStorage.getItem('psess_token') : null;
+    if (tok) {
+      await sb(`user_sessions?token=eq.${tok}`, { method:'PATCH', body:JSON.stringify({name}) }).catch(()=>{});
+    }
+    document.getElementById('prof-av').textContent  = name[0].toUpperCase();
+    document.getElementById('prof-name').textContent = name;
+    document.getElementById('tb-name').textContent   = name;
+    showMsg('msg-name', 'ok', '✅ Имя изменено!');
+    toast('✅ Имя сохранено', 'ok');
+    document.getElementById('btn-name').disabled = true;
+  } catch(e) { showMsg('msg-name', 'err', '❌ Ошибка: ' + e.message); }
+  finally { setLoading('btn-name', false); }
+}
+
+/* ═══ CHANGE PASSWORD ═══ */
+function checkPwdStrength(pwd) {
+  const bars = document.getElementById('pwd-bars');
+  const hint = document.getElementById('pwd-hint');
+  if (!pwd) { bars.style.display='none'; hint.textContent=''; return; }
+  bars.style.display = 'flex';
+  let score = 0;
+  if (pwd.length >= 6)  score++;
+  if (pwd.length >= 10) score++;
+  if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd) && /[^a-zA-Z0-9]/.test(pwd)) score++;
+  const colors = ['#ef4444','#f59e0b','#3b82f6','#22c55e'];
+  const labels = ['Слабый','Средний','Хороший','Сильный'];
+  for (let i=0;i<4;i++) {
+    document.getElementById('pb'+i).style.background = i < score ? colors[score-1] : 'var(--surface3)';
+  }
+  hint.textContent = labels[score-1] || '';
+  hint.className = 'field-hint';
+}
+
+function checkPwdForm() {
+  const cur  = document.getElementById('cur-pwd').value;
+  const np   = document.getElementById('new-pwd').value;
+  const np2  = document.getElementById('new-pwd2').value;
+  const hint = document.getElementById('pwd-match-hint');
+  if (np2) {
+    hint.textContent = np === np2 ? '✓ Пароли совпадают' : '✗ Пароли не совпадают';
+    hint.className   = 'field-hint ' + (np === np2 ? 'ok' : 'err');
+  } else {
+    hint.textContent = '';
+  }
+  document.getElementById('btn-pwd').disabled = !(cur && np.length >= 6 && np === np2);
+}
+
+async function savePwd() {
+  const curPwd = document.getElementById('cur-pwd').value;
+  const newPwd = document.getElementById('new-pwd').value;
+  const newPwd2 = document.getElementById('new-pwd2').value;
+  if (newPwd !== newPwd2) { showMsg('msg-pwd','err','❌ Пароли не совпадают'); return; }
+  if (newPwd.length < 6) { showMsg('msg-pwd','err','❌ Минимум 6 символов'); return; }
+
+  setLoading('btn-pwd', true);
+  clearMsg('msg-pwd');
+  try {
+    // Verify current password
+    const curHash = await sha256(curPwd);
+    const user = await sb(`pedagog_users?id=eq.${me.id}&select=password_hash`);
+    if (!user || !user[0] || user[0].password_hash !== curHash) {
+      showMsg('msg-pwd','err','❌ Текущий пароль неверный');
+      return;
+    }
+    const newHash = await sha256(newPwd);
+    await sb(`pedagog_users?id=eq.${me.id}`, { method:'PATCH', body:JSON.stringify({password_hash:newHash}) });
+    showMsg('msg-pwd','ok','✅ Пароль изменён!');
+    toast('✅ Пароль изменён', 'ok');
+    document.getElementById('cur-pwd').value  = '';
+    document.getElementById('new-pwd').value  = '';
+    document.getElementById('new-pwd2').value = '';
+    document.getElementById('btn-pwd').disabled = true;
+    document.getElementById('pwd-bars').style.display = 'none';
+    document.getElementById('pwd-hint').textContent   = '';
+    document.getElementById('pwd-match-hint').textContent = '';
+  } catch(e) { showMsg('msg-pwd','err','❌ Ошибка: '+e.message); }
+  finally { setLoading('btn-pwd', false); }
+}
+
+/* ═══ CHANGE PIN ═══ */
+function buildNumpad(containerId, mode) {
+  const el = document.getElementById(containerId);
+  const digits = [1,2,3,4,5,6,7,8,9,'',0,'⌫'];
+  el.innerHTML = digits.map(d => {
+    if (d === '') return '<div></div>';
+    const isDel = d === '⌫';
+    return `<button class="np-btn${isDel?' del':''}" onclick="pinInput('${mode}','${d}')">${d}</button>`;
+  }).join('');
+}
+
+function pinInput(mode, val) {
+  if (mode === 'cur') {
+    if (val === '⌫') { curPin = curPin.slice(0,-1); }
+    else if (curPin.length < 4) curPin += val;
+    updatePinDots('cur-pin-dots', curPin, 'cpd');
+    if (curPin.length === 4) setTimeout(() => verifyCurPin(), 300);
+  } else {
+    if (val === '⌫') { newPin = newPin.slice(0,-1); }
+    else if (newPin.length < 4) newPin += val;
+    updatePinDots('new-pin-dots', newPin, 'npd');
+    if (newPin.length === 4) setTimeout(() => savePin(), 300);
+  }
+}
+
+function updatePinDots(containerId, pin, prefix) {
+  for (let i=0;i<4;i++) {
+    document.getElementById(prefix+i)?.classList.toggle('filled', i < pin.length);
+  }
+}
+
+async function verifyCurPin() {
+  clearMsg('msg-pin');
+  try {
+    const hash = await sha256(curPin);
+    const user = await sb(`pedagog_users?id=eq.${me.id}&select=pin_hash`);
+    if (!user || !user[0] || user[0].pin_hash !== hash) {
+      showMsg('msg-pin','err','❌ Неверный PIN, попробуйте снова');
+      curPin = '';
+      updatePinDots('cur-pin-dots', '', 'cpd');
+      return;
+    }
+    // Correct — show new PIN step
+    document.getElementById('pin-step-cur').style.display = 'none';
+    document.getElementById('pin-step-new').style.display = 'block';
+    newPin = '';
+    updatePinDots('new-pin-dots', '', 'npd');
+  } catch(e) {
+    showMsg('msg-pin','err','❌ Ошибка: '+e.message);
+    curPin = '';
+    updatePinDots('cur-pin-dots', '', 'cpd');
+  }
+}
+
+async function savePin() {
+  try {
+    const hash = await sha256(newPin);
+    await sb(`pedagog_users?id=eq.${me.id}`, { method:'PATCH', body:JSON.stringify({pin_hash:hash}) });
+    showMsg('msg-pin','ok','✅ PIN изменён!');
+    toast('✅ PIN-код изменён', 'ok');
+    resetPinFlow();
+  } catch(e) {
+    showMsg('msg-pin','err','❌ Ошибка: '+e.message);
+    newPin = '';
+    updatePinDots('new-pin-dots', '', 'npd');
+  }
+}
+
+function resetPinFlow() {
+  curPin = ''; newPin = '';
+  updatePinDots('cur-pin-dots', '', 'cpd');
+  updatePinDots('new-pin-dots', '', 'npd');
+  document.getElementById('pin-step-cur').style.display = 'block';
+  document.getElementById('pin-step-new').style.display = 'none';
+  clearMsg('msg-pin');
+}
+
+/* ═══ UTILS ═══ */
+function toggleEye(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function setLoading(btnId, on) {
+  const btn = document.getElementById(btnId);
+  btn.classList.toggle('loading', on);
+  btn.disabled = on;
+}
+
+function showMsg(id, type, text) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = `form-msg ${type} show`;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function clearMsg(id) {
+  const el = document.getElementById(id);
+  if (el) { el.className = 'form-msg'; el.textContent = ''; }
+}
+
+async function logout() {
+  if (!confirm('Выйти из аккаунта?')) return;
+  await SESSION.destroySession();
+  window.location.replace('auth.html');
+}
+
+let toastT = null;
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `toast show ${type}`;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

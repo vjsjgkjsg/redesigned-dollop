@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Игровая комната — Цифровой навигатор педагога | Петропавловск</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="games.css"/>
+  <link rel="stylesheet" href="games-patch.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+
+<script>
+/* ── AUTH GATE: redirect to auth if not logged in ── */
+(async function(){
+  const user = await SESSION.getUser();
+  if (!user) {
+    // Show mini gate overlay instead of hard redirect
+    document.addEventListener('DOMContentLoaded', function() {
+      const gate = document.createElement('div');
+      gate.id = 'games-gate';
+      gate.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,19,48,.97);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)';
+      gate.innerHTML = `
+        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:40px 32px;max-width:380px;width:100%;text-align:center;color:#fff;font-family:'Nunito',sans-serif;animation:gr .5s cubic-bezier(.34,1.4,.64,1)">
+          <style>@keyframes gr{from{opacity:0;transform:translateY(24px) scale(.95)}to{opacity:1;transform:none}}</style>
+          <div style="font-size:64px;margin-bottom:16px">🎮</div>
+          <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:8px">Зал игр</h2>
+          <p style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:24px">Войдите в аккаунт чтобы играть и сохранять рекорды.</p>
+          <a href="auth.html" style="display:block;padding:14px;background:linear-gradient(135deg,#003366,#1976D2);color:#fff;border-radius:15px;font-weight:900;font-size:15px;text-decoration:none;margin-bottom:10px;transition:all .2s">🔑 Войти в портал</a>
+          <a href="index.html" style="display:block;padding:10px;color:rgba(255,255,255,.4);font-size:12px;font-weight:700;text-decoration:none;text-align:center">← На главную</a>
+        </div>`;
+      document.body.appendChild(gate);
+    });
+  }
+})();
+</script>
+<script src="session.js"></script>
+</head>
+<body class="games-page">
+
+<!-- CONFETTI CANVAS (inject by JS) -->
+
+<!-- ══════ HEADER ══════ -->
+<header id="games-header">
+  <div class="gh-inner">
+    <a href="index.html" class="gh-back">&#8592; На портал</a>
+    <div class="gh-title">
+      <span class="gh-star">&#11088;</span>
+      Игровая комната
+      <span class="gh-star">&#11088;</span>
+    </div>
+    <div class="gh-right">
+      <button id="show-records-btn" class="gh-records-btn" title="Рекорды и достижения">&#127942; Рекорды</button>
+      <span class="gh-age-badge">3–7 лет</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════ HERO ══════ -->
+<div class="games-hero">
+  <div class="games-hero-bubbles">
+    <span class="bubble b1">&#127918;</span><span class="bubble b2">&#129513;</span>
+    <span class="bubble b3">&#127912;</span><span class="bubble b4">&#11088;</span>
+    <span class="bubble b5">&#127803;</span><span class="bubble b6">&#129514;</span>
+    <span class="bubble b7">&#127881;</span><span class="bubble b8">&#127922;</span>
+  </div>
+  <h1 class="games-hero-title">Играем и учимся!</h1>
+  <p class="games-hero-sub">5 онлайн-игр прямо в браузере &bull; звуки &bull; рекорды &bull; достижения</p>
+  <div class="games-hero-tabs">
+    <button class="gtab active" data-tab="online">&#128187; Онлайн-игры</button>
+    <button class="gtab" data-tab="offline">&#127795; Офлайн-игры</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     ОНЛАЙН
+══════════════════════════════ -->
+<section id="tab-online" class="gtab-content active">
+
+  <div class="online-nav">
+    <button class="onav-btn active" data-game="puzzle">&#129513; Пазл</button>
+    <button class="onav-btn" data-game="memory">&#129506; Память</button>
+    <button class="onav-btn" data-game="quiz">&#10067; Викторина</button>
+    <button class="onav-btn" data-game="coloring">&#127912; Раскраска</button>
+    <button class="onav-btn" data-game="sort">&#127922; Сортировка</button>
+  </div>
+
+  <!-- ──────────────────────────────
+       ПАЗЛ
+  ────────────────────────────────── -->
+  <div id="game-puzzle" class="game-panel active">
+    <div class="game-header">
+      <div class="game-title-block">
+        <span class="game-icon-big">&#129513;</span>
+        <div>
+          <h2>Пазл «Петропавловск»</h2>
+          <p>Собери картинку достопримечательности города!</p>
+        </div>
+      </div>
+      <div class="game-controls-top">
+        <div class="game-score-box"><span class="gs-label">Ходов</span><span class="gs-val" id="puzzle-moves">0</span></div>
+        <div class="game-score-box"><span class="gs-label">Время</span><span class="gs-val" id="puzzle-timer">0:00</span></div>
+        <div class="game-score-box record-box"><span class="gs-label">Рекорд</span><span class="gs-val small" id="puzzle-record">—</span></div>
+        <button class="game-btn-round" id="puzzle-new" title="Новая игра">&#8635;</button>
+      </div>
+    </div>
+
+    <div class="puzzle-area">
+      <div class="puzzle-sidebar">
+        <p class="puzzle-choose-label">&#127775; Выбери картинку:</p>
+        <div class="puzzle-thumbs">
+          <button class="pthumb active" data-img="ablai"><div class="pthumb-art ablai-art">&#127984;</div><span>Резиденция хана</span></button>
+          <button class="pthumb" data-img="park"><div class="pthumb-art park-art">&#127795;</div><span>Парк Победы</span></button>
+          <button class="pthumb" data-img="sobor"><div class="pthumb-art sobor-art">&#9962;</div><span>Собор</span></button>
+          <button class="pthumb" data-img="step"><div class="pthumb-art step-art">&#127768;</div><span>Степь СКО</span></button>
+        </div>
+        <p class="puzzle-choose-label">&#127919; Сложность:</p>
+        <div class="puzzle-difficulty">
+          <button class="diff-btn active" data-grid="3">3&#215;3<br><small>Лёгкий</small></button>
+          <button class="diff-btn" data-grid="4">4&#215;4<br><small>Средний</small></button>
+          <button class="diff-btn" data-grid="5">5&#215;5<br><small>Сложный</small></button>
+        </div>
+        <div class="puzzle-preview-box">
+          <p class="puzzle-choose-label">&#128065; Подсказка:</p>
+          <div id="puzzle-preview-img" class="pthumb-art ablai-art puzzle-big-preview">&#127984;</div>
+        </div>
+      </div>
+      <div class="puzzle-center">
+        <div id="puzzle-board" class="puzzle-board"></div>
+      </div>
+    </div>
+
+    <div id="puzzle-win" class="game-win-overlay hidden">
+      <div class="win-box">
+        <div class="win-emoji">&#127881;</div>
+        <h3>Пазл собран!</h3>
+        <p>&#128100; Ходов: <strong id="puzzle-win-moves">0</strong></p>
+        <p>&#8987; Время: <strong id="puzzle-win-time">0:00</strong></p>
+        <div id="puzzle-win-new-rec" class="new-record-badge" style="display:none">&#127942; Новый рекорд!</div>
+        <button class="win-btn" id="puzzle-win-new">Сыграть ещё!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────
+       ПАМЯТЬ
+  ────────────────────────────────── -->
+  <div id="game-memory" class="game-panel">
+    <div class="game-header">
+      <div class="game-title-block">
+        <span class="game-icon-big">&#129506;</span>
+        <div>
+          <h2>«Найди пару»</h2>
+          <p>Переворачивай карточки и находи одинаковые!</p>
+        </div>
+      </div>
+      <div class="game-controls-top">
+        <div class="game-score-box"><span class="gs-label">Пары</span><span class="gs-val" id="mem-pairs">0/8</span></div>
+        <div class="game-score-box"><span class="gs-label">Ходы</span><span class="gs-val" id="mem-moves">0</span></div>
+        <div class="game-score-box"><span class="gs-label">Звёзды</span><span class="gs-val" id="mem-stars">&#11088;&#11088;&#11088;</span></div>
+        <div class="game-score-box record-box"><span class="gs-label">Рекорд</span><span class="gs-val small" id="mem-record">—</span></div>
+        <button class="game-btn-round" id="mem-new" title="Новая игра">&#8635;</button>
+      </div>
+    </div>
+    <div class="mem-controls-row">
+      <span>Набор:</span>
+      <button class="diff-btn active" data-memset="animals">&#128006; Животные</button>
+      <button class="diff-btn" data-memset="sights">&#127963; Достопримечательности</button>
+      <button class="diff-btn" data-memset="nature">&#127807; Природа</button>
+      <button class="diff-btn" data-memset="objects">&#127968; Предметы</button>
+    </div>
+    <div id="memory-board" class="memory-board"></div>
+    <div id="memory-win" class="game-win-overlay hidden">
+      <div class="win-box">
+        <div class="win-emoji" id="mem-win-emoji">&#127881;</div>
+        <h3>Отлично!</h3>
+        <p id="mem-win-text">Все пары найдены!</p>
+        <div class="win-stars" id="mem-win-stars"></div>
+        <div id="mem-win-newrec" class="new-record-badge" style="display:none">&#127942; Новый рекорд!</div>
+        <button class="win-btn" id="mem-win-new">Играть снова!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────
+       ВИКТОРИНА
+  ────────────────────────────────── -->
+  <div id="game-quiz" class="game-panel">
+    <div class="game-header">
+      <div class="game-title-block">
+        <span class="game-icon-big">&#10067;</span>
+        <div>
+          <h2>Знаю свой город!</h2>
+          <p>14 вопросов о Петропавловске и Казахстане</p>
+        </div>
+      </div>
+      <div class="game-controls-top">
+        <div class="game-score-box"><span class="gs-label">Счёт</span><span class="gs-val" id="quiz-score">0</span></div>
+        <div class="game-score-box"><span class="gs-label">Вопрос</span><span class="gs-val" id="quiz-progress">1/10</span></div>
+        <div class="game-score-box record-box"><span class="gs-label">Рекорд</span><span class="gs-val small" id="quiz-record">—</span></div>
+        <button class="game-btn-round" id="quiz-restart" title="Сначала">&#8635;</button>
+      </div>
+    </div>
+    <div class="quiz-area" id="quiz-question-area">
+      <div class="quiz-progress-bar"><div id="quiz-progress-fill" class="quiz-progress-fill" style="width:10%"></div></div>
+      <div id="quiz-category-badge" class="quiz-cat-badge">&#127963; Краеведение</div>
+      <div id="quiz-emoji-big" class="quiz-emoji-big">&#127961;</div>
+      <h3 id="quiz-question-text" class="quiz-question-text">Загрузка...</h3>
+      <div id="quiz-answers" class="quiz-answers"></div>
+      <div id="quiz-feedback" class="quiz-feedback hidden"></div>
+      <div id="quiz-fact-box" class="quiz-fact-box hidden"></div>
+      <button id="quiz-next-btn" class="quiz-next-btn hidden">Следующий &#8594;</button>
+    </div>
+    <div id="quiz-finish-area" class="quiz-finish hidden">
+      <div class="quiz-finish-emoji" id="quiz-finish-emoji">&#127881;</div>
+      <h3 id="quiz-finish-title">Молодец!</h3>
+      <p id="quiz-finish-text">Ты ответил правильно на X из 10 вопросов!</p>
+      <div class="quiz-stars" id="quiz-finish-stars"></div>
+      <div id="quiz-new-rec" class="new-record-badge" style="display:none">&#127942; Новый рекорд!</div>
+      <button class="win-btn" id="quiz-play-again">Сыграть ещё!</button>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────
+       РАСКРАСКА
+  ────────────────────────────────── -->
+  <div id="game-coloring" class="game-panel">
+    <div class="game-header">
+      <div class="game-title-block">
+        <span class="game-icon-big">&#127912;</span>
+        <div>
+          <h2>Раскраска «Казахстан»</h2>
+          <p>Выбери цвет и рисуй! Сохрани свой шедевр!</p>
+        </div>
+      </div>
+      <div class="game-controls-top">
+        <button class="game-btn-round" id="color-clear" title="Очистить">&#128465;</button>
+        <button class="game-btn-round" id="color-save" title="Сохранить PNG">&#128190;</button>
+        <button class="game-btn-round" id="color-new" title="Следующая картинка">&#8635;</button>
+      </div>
+    </div>
+    <div class="coloring-area">
+      <div class="color-left-panel">
+        <div class="color-palette" id="color-palette"></div>
+        <div class="brush-controls">
+          <label>&#128396; Кисть:</label>
+          <input type="range" id="brush-size" min="4" max="45" value="18"/>
+          <span id="brush-size-val">18</span>
+          <button class="eraser-btn" id="eraser-btn" title="Ластик">&#9999; Ластик</button>
+        </div>
+        <div class="coloring-thumbs" id="coloring-thumbs"></div>
+      </div>
+      <div class="coloring-stage">
+        <canvas id="color-canvas" width="520" height="400"></canvas>
+        <p class="canvas-hint">&#128070; Рисуй прямо на картинке мышкой или пальцем!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────
+       СОРТИРОВКА
+  ────────────────────────────────── -->
+  <div id="game-sort" class="game-panel">
+    <div class="game-header">
+      <div class="game-title-block">
+        <span class="game-icon-big">&#127922;</span>
+        <div>
+          <h2>Разложи по группам!</h2>
+          <p>Перетащи или нажми, потом нажми на корзину</p>
+        </div>
+      </div>
+      <div class="game-controls-top">
+        <div class="game-score-box"><span class="gs-label">Правильно</span><span class="gs-val" id="sort-correct">0</span></div>
+        <div class="game-score-box"><span class="gs-label">Ошибки</span><span class="gs-val" id="sort-errors">0</span></div>
+        <div class="game-score-box record-box"><span class="gs-label">Рекорд</span><span class="gs-val small" id="sort-record">—</span></div>
+        <button class="game-btn-round" id="sort-new" title="Новый раунд">&#8635;</button>
+      </div>
+    </div>
+    <div class="sort-mode-row">
+      <button class="diff-btn active" data-sortmode="seasons">&#127810; Сезоны</button>
+      <button class="diff-btn" data-sortmode="animals">&#128014; Животные</button>
+      <button class="diff-btn" data-sortmode="sizes">&#128269; Размеры</button>
+      <button class="diff-btn" data-sortmode="food">&#127822; Еда</button>
+    </div>
+    <div class="sort-game-area">
+      <div class="sort-items-pool" id="sort-pool"></div>
+      <div class="sort-buckets" id="sort-buckets"></div>
+    </div>
+    <div id="sort-win" class="game-win-overlay hidden">
+      <div class="win-box">
+        <div class="win-emoji">&#127881;</div>
+        <h3 id="sort-win-title">Всё разложено!</h3>
+        <p id="sort-win-text">Ошибок: 0</p>
+        <div id="sort-win-newrec" class="new-record-badge" style="display:none">&#127942; Новый рекорд!</div>
+        <button class="win-btn" id="sort-win-new">Ещё раз!</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══════════════════════════════
+     ОФЛАЙН
+══════════════════════════════ -->
+<section id="tab-offline" class="gtab-content">
+  <div class="offline-intro">
+    <div class="offline-intro-icon">&#127795;</div>
+    <div>
+      <h2>Игры без экрана</h2>
+      <p>Карточки, правила и описания для занятий в садике, на прогулке и дома</p>
+    </div>
+  </div>
+  <div class="offline-filters">
+    <button class="ofilter active" data-filter="all">Все</button>
+    <button class="ofilter" data-filter="indoor">&#127968; В помещении</button>
+    <button class="ofilter" data-filter="outdoor">&#9978; На улице</button>
+    <button class="ofilter" data-filter="cards">&#127183; Карточки</button>
+    <button class="ofilter" data-filter="active">&#127939; Подвижные</button>
+    <button class="ofilter" data-filter="creative">&#127912; Творческие</button>
+  </div>
+  <div class="offline-grid" id="offline-grid">
+
+    <div class="ocard" data-tags="cards indoor" style="display:flex">
+      <div class="ocard-header ocard-h1"><span class="ocard-emoji">&#127183;</span><span class="ocard-difficulty">&#9733; Лёгкая</span></div>
+      <div class="ocard-body">
+        <h3>Лото «Животные Казахстана»</h3>
+        <div class="ocard-meta"><span class="otag indoor">В помещении</span><span class="otag age">3–7 лет</span><span class="otag players">2–6 игроков</span><span class="otag time">20–30 мин</span></div>
+        <p>Классическое лото с карточками животных Казахстана: барс, беркут, сайгак, корсак.</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> память, внимание, словарный запас</div>
+        <details class="ocard-rules"><summary>&#128214; Правила</summary><ol><li>Каждому раздаётся большая карта с 6 животными.</li><li>Ведущий тянет маленькие карточки и называет животное.</li><li>Совпадение — закрыть клетку фишкой.</li><li>Первый закрывший все 6 — победитель.</li><li>Доп: расскажи факт о животном на картинке.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> распечатать карточки, фишки (монеты, пуговицы)</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('loto')">&#128438; Распечатать карточки</button></div>
+    </div>
+
+    <div class="ocard" data-tags="outdoor active" style="display:flex">
+      <div class="ocard-header ocard-h2"><span class="ocard-emoji">&#127939;</span><span class="ocard-difficulty">&#9733;&#9733; Средняя</span></div>
+      <div class="ocard-body">
+        <h3>Байга — степная скачка</h3>
+        <div class="ocard-meta"><span class="otag outdoor">На улице</span><span class="otag age">4–7 лет</span><span class="otag players">6–20 детей</span><span class="otag time">15–20 мин</span></div>
+        <p>Подвижная казахская народная игра-скачка. Дети «скачут» как лошади, передавая эстафету.</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> ловкость, скорость, командный дух</div>
+        <details class="ocard-rules"><summary>&#128214; Правила</summary><ol><li>2–3 команды — «табуна».</li><li>На расстоянии 20–30 м — «финиш».</li><li>По сигналу скачут (прыжки/высокий шаг), достигают финиша, возвращаются.</li><li>Касаются руки следующего игрока.</li><li>Победившая команда — «кличь победителя».</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> площадка, конусы или мел для разметки</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('bajga')">&#128438; Распечатать правила</button></div>
+    </div>
+
+    <div class="ocard" data-tags="indoor cards creative" style="display:flex">
+      <div class="ocard-header ocard-h3"><span class="ocard-emoji">&#129513;</span><span class="ocard-difficulty">&#9733; Лёгкая</span></div>
+      <div class="ocard-body">
+        <h3>Пазл «Карта города»</h3>
+        <div class="ocard-meta"><span class="otag indoor">В помещении</span><span class="otag age">4–7 лет</span><span class="otag players">1–4 игрока</span><span class="otag time">10–25 мин</span></div>
+        <p>Распечатай и разрежь карту Петропавловска. Ребёнок собирает и находит знакомые места.</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> пространственное мышление, краеведение</div>
+        <details class="ocard-rules"><summary>&#128214; Как сделать</summary><ol><li>Распечатай карту на А4 (цвет).</li><li>Наклей на картон, покрой скотчем.</li><li>Разрежь на 12 (3–4 года) или 24 части (5–7 лет).</li><li>Сложи в конверт — пазл готов!</li><li>Усложнение: назови достопримечательности.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> принтер, картон, ножницы, скотч</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('map')">&#128438; Распечатать карту</button></div>
+    </div>
+
+    <div class="ocard" data-tags="outdoor active" style="display:flex">
+      <div class="ocard-header ocard-h4"><span class="ocard-emoji">&#128678;</span><span class="ocard-difficulty">&#9733; Лёгкая</span></div>
+      <div class="ocard-body">
+        <h3>Светофор — живой</h3>
+        <div class="ocard-meta"><span class="otag outdoor">На улице</span><span class="otag age">3–6 лет</span><span class="otag players">6–30 детей</span><span class="otag time">10–15 мин</span></div>
+        <p>Воспитатель показывает цвет. Зелёный — бегут, жёлтый — идут медленно, красный — замирают.</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> реакцию, знание ПДД, саморегуляцию</div>
+        <details class="ocard-rules"><summary>&#128214; Правила</summary><ol><li>Три круга: красный, жёлтый, зелёный (~20 см).</li><li>Зелёный — все бегут.</li><li>Жёлтый — медленно идут.</li><li>Красный — замирают. Пошевелился — садится.</li><li>Победитель — последний оставшийся.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> три цветных круга из картона</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('svetofor')">&#128438; Распечатать круги</button></div>
+    </div>
+
+    <div class="ocard" data-tags="indoor cards" style="display:flex">
+      <div class="ocard-header ocard-h5"><span class="ocard-emoji">&#127917;</span><span class="ocard-difficulty">&#9733;&#9733; Средняя</span></div>
+      <div class="ocard-body">
+        <h3>Ролевая игра «Базар»</h3>
+        <div class="ocard-meta"><span class="otag indoor">В помещении</span><span class="otag age">4–7 лет</span><span class="otag players">4–15 детей</span><span class="otag time">25–40 мин</span></div>
+        <p>Продавцы, покупатели, кассиры. Игрушечные деньги и карточки товаров. «Сәлем! Рақмет!»</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> математику (счёт), речь, общение</div>
+        <details class="ocard-rules"><summary>&#128214; Как провести</summary><ol><li>2–3 продавца, остальные — покупатели.</li><li>«Товары» + ценники.</li><li>Каждому — «деньги».</li><li>Покупатели ходят, торгуются вежливо.</li><li>Через 15 мин роли меняются.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> игрушечные деньги, муляжи товаров, ценники</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('bazar')">&#128438; Распечатать деньги</button></div>
+    </div>
+
+    <div class="ocard" data-tags="outdoor active" style="display:flex">
+      <div class="ocard-header ocard-h6"><span class="ocard-emoji">&#9917;</span><span class="ocard-difficulty">&#9733; Лёгкая</span></div>
+      <div class="ocard-body">
+        <h3>Асық — казахская игра</h3>
+        <div class="ocard-meta"><span class="otag outdoor">На улице</span><span class="otag age">5–7 лет</span><span class="otag players">2–10 детей</span><span class="otag time">15–30 мин</span></div>
+        <p>Традиционная игра с бараньими косточками (асыками). Используй плоские камушки.</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> меткость, моторику, знание традиций</div>
+        <details class="ocard-rules"><summary>&#128214; Правила</summary><ol><li>Круг на земле ~50 см.</li><li>Каждый кладёт 2–3 асыка в круг.</li><li>По очереди бросают «биток», выбивают косточки.</li><li>Выбитые — победителю.</li><li>Кто набрал больше — победил.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> асыки или плоские камушки, мел</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('asyk')">&#128438; Распечатать правила</button></div>
+    </div>
+
+    <div class="ocard" data-tags="indoor creative" style="display:flex">
+      <div class="ocard-header ocard-h7"><span class="ocard-emoji">&#127912;</span><span class="ocard-difficulty">&#9733; Лёгкая</span></div>
+      <div class="ocard-body">
+        <h3>Раскраска «Казахский орнамент»</h3>
+        <div class="ocard-meta"><span class="otag indoor">В помещении</span><span class="otag age">3–7 лет</span><span class="otag players">1–30 детей</span><span class="otag time">15–20 мин</span></div>
+        <p>Раскраски с традиционными узорами. Расскажи значение «Қошқар мүйіз» (бараньи рога — сила).</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> творчество, моторику, знание культуры</div>
+        <details class="ocard-rules"><summary>&#128214; Советы</summary><ol><li>Покажи образцы на юртах, коврах.</li><li>Исторические цвета: красный, синий, золотой.</li><li>Устрой мини-выставку работ.</li><li>Для 6–7 лет: придумай свой узор.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> распечатки, карандаши или краски</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('ornament')">&#128438; Распечатать раскраски</button></div>
+    </div>
+
+    <div class="ocard" data-tags="outdoor active indoor" style="display:flex">
+      <div class="ocard-header ocard-h8"><span class="ocard-emoji">&#128269;</span><span class="ocard-difficulty">&#9733;&#9733; Средняя</span></div>
+      <div class="ocard-body">
+        <h3>«Горячо-холодно» — Петропавловск</h3>
+        <div class="ocard-meta"><span class="otag indoor">В помещении</span><span class="otag outdoor">На улице</span><span class="otag age">4–7 лет</span><span class="otag players">5–20 детей</span><span class="otag time">10–15 мин</span></div>
+        <p>Спрятана карточка с достопримечательностью. Дети ищут по подсказкам «горячо/холодно».</p>
+        <div class="ocard-goals"><strong>Развивает:</strong> ориентацию, краеведение, внимание</div>
+        <details class="ocard-rules"><summary>&#128214; Правила</summary><ol><li>Воспитатель прячет карточку (Парк, Резиденция и т.д.).</li><li>Водящий ищет, остальные подсказывают.</li><li>Найдя — называет и рассказывает о месте.</li><li>Рассказал правильно — становится ведущим.</li></ol></details>
+        <div class="ocard-materials"><strong>Нужно:</strong> карточки с достопримечательностями (6–8 шт)</div>
+      </div>
+      <div class="ocard-footer"><button class="ocard-print-btn" onclick="printCard('hot_cold')">&#128438; Распечатать карточки</button></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="games-footer">
+  <div class="gf-inner">
+    <a href="index.html" class="gf-back">&#8592; Вернуться на портал</a>
+    <div class="gf-info">
+      <span>&#127891; Цифровой навигатор педагога</span>
+      <span>г. Петропавловск, СКО &bull; 2025</span>
+    </div>
+  </div>
+</footer>
+
+<div id="games-toast"></div>
+
+<script src="games.js"></script>
+<script src="games-patch.js"></script>
+</body>
+</html>
